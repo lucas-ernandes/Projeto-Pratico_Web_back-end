@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %} Cadastrar Operação {% endblock %}
+
+{% block conteudo %}
+
+<h1 class="mb-4">Cadastrar Operação</h1>
+
+<form action="{{ url_for('cadastrar') }}" method="POST">
+    <div class="mb-3">
+        <label class="form-label">Data</label>
+        <input type="date" name="data" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Código do ativo</label>
+        <input type="text" name="ativo" class="form-control"
+               placeholder="Ex.: PETR41" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Quantidade</label>
+        <input type="number" name="quantidade" class="form-control"
+               min="1" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Valor unitário (R$)</label>
+        <input type="number" name="valor_unitario" class="form-control"
+               min="0.01" step="0.01" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Tipo de operação</label>
+
+        <select name="tipo_operacao" class="form-select" required>
+            <option value="compra">Compra</option>
+            <option value="venda">Venda</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Cadastrar</button>
+
+    <a href="{{ url_for('listar') }}" class="btn btn-secondary">
+        Ver operações
+    </a>
+</form>
+
+{% endblock %}

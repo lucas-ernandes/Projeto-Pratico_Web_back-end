@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block titulo %}Editar Operação{% endblock %}
+
+{% block conteudo %}
+
+<h1 class="mb-4">Editar Operação</h1>
+
+<form action="{{ url_for('editar', id=operacao['id']) }}" method="POST">
+
+    <div class="mb-3">
+        <label class="form-label">ID da operação</label>
+        <input type="text" class="form-control" value="{{ operacao['id'] }}" readonly>  <!--readonly: deixa o ID visível, mas impede que ele seja editado pelo formulário.-->
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Data</label>
+        <input type="date" name="data" class="form-control" 
+        value="{{ operacao['data'] }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Codigo do Ativo</label>
+        <input type="text" name="ativo" class="form-control" 
+        value="{{ operacao['ativo'] }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Quantidade</label>
+        <input type="number" name="quantidade" class="form-control" min="1"
+        value="{{ operacao['quantidade'] }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Valor unitário (R$)</label>
+        <input type="number" name="valor_unitario" class="form-control"
+        min="0.01" step="0.01"
+        value="{{ operacao['valor_unitario'] }}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Tipo de operação</label>
+
+        <select name="tipo_operacao" class="form-select" required>
+            <!-- o *selected* seleciona uma opção, e o if decide quando essa opção deve ser selecionada. -->
+            <option value="compra" {% if operacao['tipo_operacao'] == 'compra' %}selected{% endif %}>
+                Compra
+            </option>
+
+            <option value="venda" {% if operacao['tipo_operacao'] == 'venda' %}selected{%endif%}>
+                Venda
+            </option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+
+    <a href="{{ url_for('detalhes', id=operacao['id']) }}" class="btn btn-secondary">
+        Cancelar
+    </a>
+
+</form>
+{% endblock %}
