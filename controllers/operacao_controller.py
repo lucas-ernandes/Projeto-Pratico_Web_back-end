@@ -5,42 +5,19 @@ def inicio():
     return render_template('index.html')
 
 def cadastrar():
-    if request.method == "POST":
-        data = request.form['data']
-        ativo = request.form['ativo'].strip()
-        tipo_operacao = request.form['tipo_operacao']
-        
-        # Tenta converter os valores para números
-        try:
-            quantidade = int(request.form['quantidade'])
-            valor_unitario = float(request.form['valor_unitario'])
-        except ValueError:
-            flash('Quantidade e valor devem ser numeros válidos.', 'danger')
-            return render_template('cadastrar.html')
+    if request.method == 'POST':
+        operacao = Operacao(dados=request.form)
+        operacao.validar()
 
-        #verificar se os dados estão corretos
-        erros = Operacao.validar(
-            data, ativo, quantidade, valor_unitario, tipo_operacao
-        )
-        
-        #Mostra erros encontrados
-        if erros:
-            for erro in erros:
+        if operacao.erros:
+            for erro in operacao.erros:
                 flash(erro, 'danger')
             return render_template('cadastrar.html')
         
-        #cria a operacao e salva no banco
-        operacao = Operacao(
-            data, ativo, quantidade, valor_unitario, tipo_operacao
-        )
-        
-        resultado = operacao.salvar()
-        
-        if resultado:
-            flash('Operação cadastrada com sucesso!', 'success')
+        if operacao.salvar():
+            flash('Operação cadastrada com Sucesso!', 'success')
         else:
-            flash('Não foi possivel cadastrar a operacao.', 'danger')
-
+            flash('Não foi possivel se cadastrar a  operação.', 'danger')
         return redirect(url_for('listar'))
     
     return render_template('cadastrar.html')
@@ -66,43 +43,19 @@ def editar(id):
         return redirect(url_for('listar'))
     
     if request.method == 'POST':
-        data = request.form['data']
-        ativo = request.form['ativo'].strip()
-        tipo_operacao = request.form['tipo_operacao']
-        
-        # Tenta converter os valores para numeros
-        try:
-            quantidade = int(request.form['quantidade'])
-            valor_unitario = float(request.form['valor_unitario'])
-        except ValueError:
-            flash("Quantidade e valor devem ser números válidos.", 'danger')
+       operacao = Operacao(request.form)
+       operacao.validar()
+       
+       if operacao.erros:
+            for erro in operacao.erros:
+                flash(erro, 'danger')
             return render_template('editar.html', operacao=operacao_atual)
-        
-        #Verifica se os dados estão corretos
-        erros = Operacao.validar(
-            data, ativo, quantidade, valor_unitario, tipo_operacao
-        )
-        
-        #Se houver erros, não atualiza a operacao
-        if erros:
-            for erro in erros:
-                flash(erro, 'dange')
-            
-            return render_template('editar.html', operacao=operacao_atual)
-        
-        #Cria a operacao com os novos dados
-        operacao = Operacao(
-            data, ativo, quantidade, valor_unitario, tipo_operacao
-        )
-        
-        resultado = operacao.update(id)
-
-        if resultado:
+    
+       if operacao.update(id):
             flash('Operação atualizada com sucesso!', 'success')
             return redirect(url_for('detalhes', id=id))
-        
-        else:
-            flash('Não foi possivel atualizar a operação.', 'danger')
+       else:
+            flash('Não foi possível atualizar a operação.', 'danger')
         
     return render_template('editar.html', operacao=operacao_atual)
     

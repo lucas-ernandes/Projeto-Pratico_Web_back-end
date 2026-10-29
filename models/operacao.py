@@ -1,63 +1,71 @@
 import re
+from datetime import date
 from daos.operacao_dao import OperacaoDAO
 
 
 class Operacao:
+    taxa = 0.0003
+    
+    def __init__(self, dados: dict):
+        self.dados = dados  #só vai quardar os valores do form
+        self.erros = []
 
-    def __init__(self, data, ativo, quantidade, valor_unitario, tipo_operacao):
-        self.data = data
-        self.ativo = ativo
-        self.quantidade = quantidade
-        self.valor_unitario = valor_unitario
-        self.tipo_operacao = tipo_operacao
 
-        # Calcula o valor bruto
-        self.valor_bruto = quantidade * valor_unitario
-
-        # Calcula as taxas de 0.03%
-        self.taxas = self.valor_bruto * 0.0003
-
-        # Calcula o valor líquido
-        if tipo_operacao == 'compra':
-            self.valor_liquido = self.valor_bruto + self.taxas
-        else:
-            self.valor_liquido = self.valor_bruto - self.taxas
-
-    # Cadastra uma operação
-    @staticmethod
-    def validar(data, ativo, quantidade, valor_unitario, tipo_operacao):
-        erros = []
+# VALIDAÇÂO
+    def validar(self):
+        v = self.dados
+        ativo = v.get('ativo', '').strip()
+        tipo = v.get('tipo_operacao')
 
         # Verifica o formato do código do ativo
         if not re.fullmatch(r'[A-Z]{4}[0-9]{1,2}', ativo):
-            erros.append(
+            self.erros.append(
                 'O ativo deve ter 4 letras maiúsculas e 1 ou 2 números.'
             )
 
-        # Verifica se a quantidade é positiva
-        if quantidade <= 0:
-            erros.append('A quantidade deve ser maior que zero.')
-
-        # Verifica se o valor unitário é positivo
-        if valor_unitario <= 0:
-            erros.append('O valor unitário deve ser maior que zero.')
-
-        # Verifica o tipo da operação
-        if tipo_operacao not in ['compra', 'venda']:
-            erros.append('O tipo deve ser compra ou venda.')
-
+        # Verifica o tipo de operação
+        if tipo not in ('compra', 'venda'):
+            self.erros.append('O tipo deve ser compra ou venda.')
+            
         # Verifica se a data é válida
         try:
-            from datetime import date
-            date.fromisoformat(data)
+            date.fromisoformat(v.get('data'))
         except (ValueError, TypeError):
-            erros.append('Informe uma data válida.')
+            self.erros.append('Informe uma data válida.')
+            
+        # Verifica a quantidade
+        try:
+            quantidade = int(v.get('quantidade'))
+            if quantidade <0:
+                self.erros.append('A quantidade deve ser que maior 0!')
+        except (ValueError, TypeError):
+            self.erros.append("A quantidade tem que ser numero INTEIRO!")
 
-        return erros
+
+        # Verifica se o valor unitário é positivo
+        try:
+            valor_unitario = float(v.get('valor_unitario'))
+            if valor_unitario <=0:
+                self.erros.append('O valor unitário deve ser maior que 0')
+        except (ValueError, TypeError):
+            self.erros.append('O valor unitário deve ser um número válido.')
+            
+        
+        #só vai calcular agora se TUDO estiver certo(se Deus quiser)
+        if not self.erros:
+            bruto = quantidade * valor_unitario
+            taxas = bruto * self.taxa
+            liquido = bruto + taxas if tipo == 'compra' else bruto - taxas
+            
+            self.dados = {
+                'data': v['data'], 'ativo': ativo,
+                'quantidade': quantidade, 'valor_unitario': valor_unitario,
+                'tipo_operacao': tipo, 'valor_bruto': bruto,
+                'taxas': taxas, 'valor_liquido': liquido
+            }
     
     def salvar(self): 
-        dao = OperacaoDAO()
-        return dao.cadastrar(self)
+        return OperacaoDAO().cadastrar(self.dados) == 1
 
     # Lista todas as operações
     @staticmethod
@@ -73,8 +81,7 @@ class Operacao:
 
     # Atualiza uma operação
     def update(self, id):
-        dao = OperacaoDAO()
-        return dao.update(id, self) #envia os dados ao DAO para salvar no banco.
+        return  OperacaoDAO().update(id, self.dados) == 1 #envia os dados ao DAO para salvar no banco.
 
     # Exclui uma operação
     @staticmethod

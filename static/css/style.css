@@ -1,0 +1,40 @@
+body{
+    display: flex;
+    flex-direction: column;
+}
+
+/* navbar */
+h2, p {
+  margin: 10px;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+}
+
+ul li a {
+  display: block;
+  color: white;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+ul li a:hover {
+  background-color: #460808;
+}
+
+/* footer */
+footer {
+    text-align: center;
+    color: white;
+    display: flex;
+
+    padding: 45px 20px;
+    color: #fbfbfbf6;
+    border-top: 3px solid #00a859;
+    margin-top: 16%;
+}
